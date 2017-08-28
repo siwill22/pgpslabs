@@ -312,6 +312,17 @@ def warp_subduction_segment(tessellated_line,
     return points, point_depths, polyline
 
 
+def write_subducted_slabs_to_xyz(output_filename,output_data):
+	
+    with open(output_filename, 'w') as output_file:
+        output_file.write('Long,Lat,Depth,AgeAtSubduction,TimeOfSubduction\n')
+        for output_segment in output_data:
+            for index in range(len(output_segment[2])):
+                output_file.write('%0.6f,%0.6f,%0.6f,%0.2f,%0.2f\n' % (output_segment[1].to_lat_lon_array()[index,1],
+                                                                       output_segment[1].to_lat_lon_array()[index,0],
+                                                                       output_segment[2][index],
+                                                                       output_segment[3][index],
+                                                                       output_segment[0]))
 
 
 
