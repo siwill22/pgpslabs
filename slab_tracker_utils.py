@@ -25,22 +25,17 @@ def make_age_interpolator(grdfile,interp='Spherical'):
         
     gridZ_filled = inpaint.fill_ndimage(gridZ)
     
-    interp_results = []
-    for subduction_boundary_section in subduction_boundary_sections:
-        
-        x = subduction_boundary_section.get_geometry().to_lat_lon_array()[:,1]
-        y = subduction_boundary_section.get_geometry().to_lat_lon_array()[:,0]
-        
-        # spherical interpolation
-        if interp is 'Spherical':
-            lut = spi.RectSphereBivariateSpline(np.radians(gridY[1:-1]+90.),
-                                                np.radians(gridX[1:-1]+180.),
-                                                gridZ_filled[1:-1,1:-1])
+    # spherical interpolation
+    # Note the not-ideal method for avoiding issues with points at the edges of the grid
+    if interp is 'Spherical':
+        lut = spi.RectSphereBivariateSpline(np.radians(gridY[1:-1]+90.),
+                                            np.radians(gridX[1:-1]+180.),
+                                            gridZ_filled[1:-1,1:-1])
 
-        # flat earth interpolation
-        elif interp is 'FlatEarth':
-            lut=spi.RectBivariateSpline(gridX,gridY,gridZ_filled.T)
-        
+    # flat earth interpolation
+    elif interp is 'FlatEarth':
+        lut=spi.RectBivariateSpline(gridX,gridY,gridZ_filled.T)
+
     return lut
 
 
