@@ -22,6 +22,11 @@ def make_age_interpolator(grdfile,interp='Spherical'):
     gridX = data_array.coords[coord_keys[0]].data
     gridY = data_array.coords[coord_keys[1]].data
     gridZ = data_array.data
+
+    # handle grids that are in range 0_360 instead of -180_180
+    if gridX.max()>180.:
+        index = np.where(gridX)>180.
+        gridX = np.hstack
         
     gridZ_filled = inpaint.fill_ndimage(gridZ)
     
@@ -79,6 +84,7 @@ def find_overriding_and_subducting_plates(subduction_shared_sub_segment, time):
         print('Unable to find the overriding and subducting plates of the subducting shared sub-segment "{0}" at {1}Ma'.format(
             subduction_shared_sub_segment.get_feature().get_name(), time), file=sys.stderr)
         print('    there are not exactly 2 topologies sharing the sub-segment.', file=sys.stderr)
+        print(str(sharing_resolved_topologies[0].get_resolved_feature().get_reconstruction_plate_id()), file=sys.stderr)
         return
 
     overriding_plate = None
@@ -130,11 +136,13 @@ def find_overriding_and_subducting_plates(subduction_shared_sub_segment, time):
 def warp_subduction_segment(tessellated_line,
                             rotation_model,
                             subducting_plate_id,
+                            overriding_plate_id,
                             subduction_polarity,
                             time,
                             end_time,
                             time_step,
                             dip_angle_radians,
+                            subducting_plate_disappearance_time=-1,
                             use_small_circle_path=False):
 
     # We need to reverse the subducting_normal vector direction if overriding plate is to
@@ -169,9 +177,23 @@ def warp_subduction_segment(tessellated_line,
     # iterate over each time in the range defined by the input parameters
     for warped_time in np.arange(time, warped_end_time-time_step,-time_step):
 
-        # the stage rotation that describes the motion of the subducting plate,
-        # with respect to the fixed plate for the rotation model
-        stage_rotation = rotation_model.get_rotation(warped_time-time_step, subducting_plate_id, warped_time)
+        #if warped_time<=23. and subducting_plate_id==902:
+        #    if overriding_plate_id in [224,0,101]:
+        #        print('forcing Farallon to become Cocos where overriding plate id is %d' % overriding_plate_id)
+        #        subducting_plate_id = 909
+        #    else:
+        #        print('forcing Farallon to become Nazca where overriding plate id is %d' % overriding_plate_id)
+        #        subducting_plate_id = 911
+        if warped_time<=subducting_plate_disappearance_time:
+            print('Using %0.2f to %0.2f Ma stage pole for plate %d' % (subducting_plate_disappearance_time+time_step, subducting_plate_disappearance_time, subducting_plate_id))
+            stage_rotation = rotation_model.get_rotation(subducting_plate_disappearance_time+time_step, 
+                                                         subducting_plate_id, 
+                                                         subducting_plate_disappearance_time)
+
+        else:
+            # the stage rotation that describes the motion of the subducting plate,
+            # with respect to the fixed plate for the rotation model
+            stage_rotation = rotation_model.get_rotation(warped_time-time_step, subducting_plate_id, warped_time)
 
         if use_small_circle_path:
             stage_pole, stage_pole_angle_radians = stage_rotation.get_euler_pole_and_angle()
