@@ -6,3 +6,4 @@ subduction_3d_geometries_time_0.00Ma_dip_45.00deg.asc
 *.asc
 
 .ipynb_checkpoints/splits-and-merges-checkpoint.ipynb
+*.pyc
