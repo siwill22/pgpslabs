@@ -7,3 +7,4 @@ subduction_3d_geometries_time_0.00Ma_dip_45.00deg.asc
 
 .ipynb_checkpoints/splits-and-merges-checkpoint.ipynb
 *.pyc
+.ipynb_checkpoints/slab_tracker_utils-checkpoint.py
