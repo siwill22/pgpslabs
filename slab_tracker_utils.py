@@ -19,17 +19,23 @@ def make_age_interpolator(grdfile,interp='Spherical'):
     data_array = ds_disk['z']
 
     coord_keys = data_array.coords.keys()
-    gridX = data_array.coords[coord_keys[0]].data
-    gridY = data_array.coords[coord_keys[1]].data
+    gridX = data_array.coords['lon'].data
+    gridY = data_array.coords['lat'].data
     gridZ = data_array.data
 
     # handle grids that are in range 0_360 instead of -180_180
     if gridX.max()>180.:
-        index = np.where(gridX)>180.
-        gridX = np.hstack
+        index1 = np.where(gridX>180.)[0]
+        index2 = np.where(gridX<=180.)[0]
+        gridX = np.hstack((gridX[index1]-360.,gridX[index2]))
+        gridZ = np.hstack((gridZ[:,index1],gridZ[:,index2]))
         
     gridZ_filled = inpaint.fill_ndimage(gridZ)
     
+    print(data_array.coords['lon'])
+    print(gridX)
+    #print(gridZ)
+        
     # spherical interpolation
     # Note the not-ideal method for avoiding issues with points at the edges of the grid
     if interp is 'Spherical':
