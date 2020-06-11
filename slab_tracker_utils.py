@@ -27,8 +27,8 @@ def make_age_interpolator(grdfile,interp='Spherical'):
     if gridX.max()>180.:
         index1 = np.where(gridX>180.)[0]
         index2 = np.where(gridX<=180.)[0]
-        gridX = np.hstack((gridX[index1]-360.,gridX[index2]))
-        gridZ = np.hstack((gridZ[:,index1],gridZ[:,index2]))
+        gridX = np.hstack((gridX[index1]-360.,gridX[index2[1:]]))
+        gridZ = np.hstack((gridZ[:,index1],gridZ[:,index2[1:]]))
         
     gridZ_filled = inpaint.fill_ndimage(gridZ)
     
