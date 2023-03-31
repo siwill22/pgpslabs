@@ -14,9 +14,9 @@ bug_fix_arc_dir = -1.0 if pygplates.Version.get_imported_version() < pygplates.V
 # an interpolator object that can be evaluated later at specified points
 def make_age_interpolator(grdfile,interp='Spherical'):
  
-    ds_disk = xr.open_dataset(grdfile)
-    
-    data_array = ds_disk['z']
+    #ds_disk = xr.open_dataset(grdfile)
+    #data_array = ds_disk['z']
+    data_array = xr.open_dataarray(grdfile)
 
     coord_keys = data_array.coords.keys()
     gridX = data_array.coords['lon'].data
@@ -32,19 +32,19 @@ def make_age_interpolator(grdfile,interp='Spherical'):
         
     gridZ_filled = inpaint.fill_ndimage(gridZ)
     
-    print(data_array.coords['lon'])
-    print(gridX)
+    #print(data_array.coords['lon'])
+    #print(gridX)
     #print(gridZ)
         
     # spherical interpolation
     # Note the not-ideal method for avoiding issues with points at the edges of the grid
-    if interp is 'Spherical':
+    if interp == 'Spherical':
         lut = spi.RectSphereBivariateSpline(np.radians(gridY[1:-1]+90.),
                                             np.radians(gridX[1:-1]+180.),
                                             gridZ_filled[1:-1,1:-1])
 
     # flat earth interpolation
-    elif interp is 'FlatEarth':
+    elif interp == 'FlatEarth':
         lut=spi.RectBivariateSpline(gridX,gridY,gridZ_filled.T)
 
     return lut
@@ -245,7 +245,7 @@ def warp_subduction_segment(tessellated_line,
             else:
                 normal = (prev_normal + next_normal).to_normalised()
 
-            parallel = pygplates.Vector3D.cross(point.to_xyz(), normal).to_normalised()
+            parallel = pygplates.Vector3D.cross(points[point_index].to_xyz(), normal).to_normalised()
 
             normals.append(normal)
             parallels.append(parallel)
